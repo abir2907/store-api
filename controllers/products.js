@@ -6,9 +6,16 @@ const getAllProductsStatic = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) => {
-  // If /products?featured=false, then req.query is {featured: false}
-  const products = await Product.find(req.query);
+  const { featured } = req.query;
+  const queryObject = {};
+
+  if (featured) {
+    queryObject.featured = featured === "true" ? true : false;
+  }
+  const products = await Product.find(queryObject);
   res.status(200).json({ products, nbHits: products.length });
+  // If featured is not present in query then
+  // queryObject = {} and we will get all products
 };
 
 module.exports = { getAllProductsStatic, getAllProducts };
