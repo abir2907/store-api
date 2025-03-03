@@ -39,6 +39,14 @@ const getAllProducts = async (req, res) => {
     result = result.select(fieldsList);
   }
 
+  // limit tells us the no. of itmes in each page
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // first skip according to page, then limit results
+  result = result.skip(skip).limit(limit);
+
   const products = await result;
   res.status(200).json({ products, nbHits: products.length });
 };
