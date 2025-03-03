@@ -20,20 +20,6 @@ const getAllProducts = async (req, res) => {
   if (name) {
     queryObject.name = { $regex: name, $options: "i" };
   }
-  console.log(queryObject);
-  let result = Product.find(queryObject);
-
-  if (sort) {
-    const sortList = sort.split(",").join(" ");
-    result = result.sort(sortList);
-  } else {
-    result = result.sort("createdAt");
-  }
-
-  if (fields) {
-    const fieldsList = fields.split(",").join(" ");
-    result = result.select(fieldsList);
-  }
 
   if (numericFilters) {
     const operatorMap = {
@@ -49,7 +35,28 @@ const getAllProducts = async (req, res) => {
       regEx,
       (match) => `-${operatorMap[match]}-`
     );
-    console.log(filters);
+    const options = ["price", "rating"];
+    filters = filters.split(",").forEach((item) => {
+      const [field, operator, value] = item.split("-");
+      if (options.includes(field)) {
+        queryObject[field] = { [operator]: Number(value) };
+      }
+    });
+  }
+
+  console.log(queryObject);
+  let result = Product.find(queryObject);
+
+  if (sort) {
+    const sortList = sort.split(",").join(" ");
+    result = result.sort(sortList);
+  } else {
+    result = result.sort("createdAt");
+  }
+
+  if (fields) {
+    const fieldsList = fields.split(",").join(" ");
+    result = result.select(fieldsList);
   }
 
   // limit tells us the no. of itmes in each page
